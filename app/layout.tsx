@@ -9,6 +9,7 @@ const inter = Montserrat ({ subsets: ["latin"] })
 const queryClient = new QueryClient()
 
 
+
 export default function RootLayout({
   children,
 }: {

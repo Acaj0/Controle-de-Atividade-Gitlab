@@ -2,8 +2,8 @@ import { NextResponse } from "next/server"
 import axios from "axios"
 import type { GitLabProject, GitLabMember } from "@/types/gitlab"
 
-const BASE_URL = "https://gitlab.com/api/v4/"
-const TOKEN = "glpat-eArbSJkeTt-CGo3dsS-V"
+const BASE_URL = "http://gitlab.ci.redeflex.com.br/api/v4"
+const TOKEN = ""
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const projectId = params.id

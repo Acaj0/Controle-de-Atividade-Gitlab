@@ -54,7 +54,7 @@ export default function CommitGrid({ userId, projectId }: CommitHeatmapProps) {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 md:overflow-scroll lg:overflow-clip">
       <div className="space-y-1">
         <div className="flex ml-24 gap-14 mb-1">
           {months.map((month, index) => (
@@ -63,7 +63,7 @@ export default function CommitGrid({ userId, projectId }: CommitHeatmapProps) {
             </div>
           ))}
         </div>
-        <div className="flex">
+        <div className="flex ">
           <div className="grid mt-2 grid-rows-7 gap-[3px] mr-2 text-xs text-gray-400">
             <div className="h-4 flex items-center">Dom</div>
             <div className="h-4 flex items-center">Seg</div>
@@ -75,13 +75,13 @@ export default function CommitGrid({ userId, projectId }: CommitHeatmapProps) {
           </div>
 
 
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-1 mt-2 ">
             {Array.from(
               {
                 length: Math.ceil((daysOfYear.length + adjustedFirstDayOfWeek) / 7),
               },
               (_, weekIndex) => (
-                <div key={weekIndex} className="grid grid-rows-7 gap-1">
+                <div key={weekIndex} className="grid grid-rows-7 gap-1 ">
                   {Array.from({ length: 7 }, (_, dayIndex) => {
                     const dayOfYearIndex = weekIndex * 7 + dayIndex - adjustedFirstDayOfWeek
                     const day = daysOfYear[dayOfYearIndex]

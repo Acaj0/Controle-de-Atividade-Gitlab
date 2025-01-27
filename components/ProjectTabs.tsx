@@ -48,11 +48,11 @@ export default function ProjectTabs() {
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-2">
         {projects.map((project) => (
           <button
             key={project.id}
-            className={`px-4 py-2 rounded-sm mr-2 ${activeTab === project.id ? "bg-red-800 text-white" : "bg-white"}`}
+            className={`px-4 py-2 mb-2 rounded-sm mr-2 ${activeTab === project.id ? "bg-red-800 text-white" : "bg-white"}`}
             onClick={() => setActiveTab(project.id)}
           >
             {project.name}

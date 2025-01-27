@@ -14,11 +14,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const [projectResponse, membersResponse] = await Promise.all([
       axios.get<GitLabProject>(`${BASE_URL}/projects/${projectId}`, {
         headers: { Authorization: `Bearer ${TOKEN}` },
-        timeout: 10000, // 10 seconds timeout
+        timeout: 10000, 
       }),
       axios.get<GitLabMember[]>(`${BASE_URL}/projects/${projectId}/members`, {
         headers: { Authorization: `Bearer ${TOKEN}` },
-        timeout: 10000, // 10 seconds timeout
+        timeout: 10000, 
       }),
     ])
 
@@ -38,14 +38,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ error: "Request timed out. Please try again." }, { status: 504 })
       }
       if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
         return NextResponse.json(
           { error: `GitLab API error: ${error.response.status}` },
           { status: error.response.status },
         )
       } else if (error.request) {
-        // The request was made but no response was received
         return NextResponse.json({ error: "No response received from GitLab API" }, { status: 503 })
       }
     }

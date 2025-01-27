@@ -1,5 +1,6 @@
 "use client"
 
+import { Metadata } from "next"
 import "./globals.css"
 import { Montserrat  } from "next/font/google"
 import { QueryClient, QueryClientProvider } from "react-query"
@@ -7,6 +8,10 @@ import { QueryClient, QueryClientProvider } from "react-query"
 const inter = Montserrat ({ subsets: ["latin"] })
 
 const queryClient = new QueryClient()
+
+export const metadata: Metadata = {
+  title: "Redeflex - Controle de Atividades Gitlab",
+};
 
 export default function RootLayout({
   children,

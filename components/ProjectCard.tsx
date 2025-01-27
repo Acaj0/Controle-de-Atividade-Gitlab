@@ -11,7 +11,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       {project.members.map((member) => (
         <div key={member.id} className="mb-4">
           <h4 className="text-2xl font-bold">{member.name}</h4>
-          {/* Renderiza CommitGrid */}
           <CommitGrid userId={member.id.toString()} projectId={project.id.toString()} />
           </div>
       ))}

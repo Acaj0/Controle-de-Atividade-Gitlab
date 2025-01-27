@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import type { GitLabProject } from "../types/gitlab"
 
-const projectIds = [66510560, 66510759, 66510764] // projetos
+const projectIds = [221, 217, 224, 170, 181, 183, 201, 177, 26, 215] // projetos
 
 export default function ProjectTabs() {
   const [activeTab, setActiveTab] = useState<number>(projectIds[0])

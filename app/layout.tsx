@@ -9,10 +9,6 @@ const inter = Montserrat ({ subsets: ["latin"] })
 
 const queryClient = new QueryClient()
 
-export const metadata: Metadata = {
-  title: "Redeflex - Controle de Atividades Gitlab",
-};
-
 export default function RootLayout({
   children,
 }: {

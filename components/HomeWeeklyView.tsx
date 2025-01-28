@@ -65,7 +65,7 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
 
   return (
     <div className="flex items-center justify-center hover:shadow-lg gap-4 outline-1 outline p-6 rounded-lg">
-      <span className="text-lg font-medium w-96">{member.name}</span>
+      <span className="text-xl font-medium text-center w-96 text-clip">{member.name}</span>
       <div className="flex gap-2">
         {weekDates.map((date) => (
           <div

@@ -2,12 +2,15 @@ import { NextResponse } from "next/server"
 import axios from "axios"
 import type { CommitData } from "@/types/gitlab"
 
-const BASE_URL = "http://gitlab.ci.redeflex.com.br/api/v4"
-const TOKEN = ""
+const BASE_URL = "https://gitlab.com/api/v4/"
+const TOKEN = "glpat-eArbSJkeTt-CGo3dsS-V"
 
 interface GitLabEvent {
   project_id: number
   created_at: string
+  push_data?: {
+    ref: string 
+  }
 }
 
 export async function GET(request: Request, { params }: { params: { userId: string; projectId: string } }) {
@@ -38,18 +41,10 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       url = nextLink ? nextLink[1] : ""
     }
 
-    const commitCounts: Record<string, number> = allEvents.reduce(
-      (acc, event) => {
-        const date = event.created_at.split("T")[0]
-        acc[date] = (acc[date] || 0) + 1
-        return acc
-      },
-      {} as Record<string, number>,
-    )
-
-    const commitData: CommitData[] = Object.entries(commitCounts).map(([date, count]) => ({
-      date,
-      count,
+    const commitData = allEvents.map((event) => ({
+      date: event.created_at.split("T")[0],
+      branch: event.push_data?.ref?.replace("refs/heads/", "") || "unknown",
+      count: 1,
     }))
 
     return NextResponse.json(commitData)
@@ -58,4 +53,3 @@ export async function GET(request: Request, { params }: { params: { userId: stri
     return NextResponse.json({ error: "Failed to fetch commit data" }, { status: 500 })
   }
 }
-

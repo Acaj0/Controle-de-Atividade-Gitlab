@@ -1,4 +1,4 @@
-"use client" 
+"use client"
 
 import { useQuery } from "react-query"
 import { useState } from "react"
@@ -91,9 +91,21 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
 export default function HomeWeeklyView({ projects }: { projects: GitLabProject[] }) {
   const allMembers = projects.flatMap((project) => project.members)
   const uniqueMembers = Array.from(new Map(allMembers.map((member) => [member.id, member])).values())
-  const sortedMembers = uniqueMembers.sort((a, b) => a.name.localeCompare(b.name))
 
-  const queries = sortedMembers.map((member) =>
+  const excludedMembers = [
+    "Adrian Toledo Procopiou",
+    "Andressa Da Silva Carvalho",
+    "Fernando Prudencio De Souza",
+    "Jaudo Cesar Martins Correa",
+    "Luis Felipe Amorim Sant Ana",
+    "Joao Almeida",
+    "Ulisses Ribeiro Da Silva",
+  ]
+
+  const filteredMembers = uniqueMembers.filter((member) => !excludedMembers.includes(member.name))
+  const sortedMembers = filteredMembers.sort((a, b) => a.name.localeCompare(b.name))
+
+  const memberQueries = sortedMembers.map((member) =>
     projects.map((project) =>
       useQuery<Commit[], Error>(["commits", member.id, project.id], async () => {
         const res = await fetch(`/api/commits/${member.id}/${project.id}`)
@@ -103,8 +115,8 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
     ),
   )
 
-  const isLoading = queries.flat().some((query) => query.isLoading)
-  const error = queries.flat().some((query) => query.isError)
+  const isLoading = memberQueries.flat().some((query) => query.isLoading)
+  const error = memberQueries.flat().some((query) => query.isError)
 
   if (isLoading) return <div>Carregando...</div>
   if (error) return <div>Erro ao carregar commits</div>
@@ -130,3 +142,4 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
     </div>
   )
 }
+

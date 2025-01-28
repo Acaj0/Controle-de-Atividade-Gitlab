@@ -54,7 +54,7 @@ export default function CommitGrid({ userId, projectId }: CommitHeatmapProps) {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
   return (
-    <div className="space-y-4 md:overflow-scroll lg:overflow-clip">
+    <div className="space-y-4 overflow-x-scroll lg:overflow-clip">
       <div className="space-y-1">
         <div className="flex ml-24 gap-14 mb-1">
           {months.map((month, index) => (

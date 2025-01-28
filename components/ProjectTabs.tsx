@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import type { GitLabProject } from "../types/gitlab";
 
-const projectIds = [66510560, 66510759, 66510764]; // projetos
+const projectIds = [221, 217, 224, 170, 181, 183, 201, 177, 26, 215] // projetos
 
 export default function ProjectTabs() {
   const [activeTab, setActiveTab] = useState<number | "home">("home");
@@ -52,7 +52,7 @@ export default function ProjectTabs() {
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-2">
         <button
           className={`px-4 py-2 hover:shadow-lg rounded-sm mr-2 ${
             activeTab === "home" ? "bg-red-800 text-white" : "bg-white"
@@ -74,7 +74,7 @@ export default function ProjectTabs() {
         {projects.map((project) => (
           <button
             key={project.id}
-            className={`px-4 py-2 hover:shadow-lg rounded-sm mr-2 ${
+            className={`px-4 py-2 mb-2 hover:shadow-lg rounded-sm mr-2 ${
               activeTab === project.id ? "bg-red-800 text-white" : "bg-white"
             }`}
             onClick={() => setActiveTab(project.id)}

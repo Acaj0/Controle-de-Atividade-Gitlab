@@ -111,13 +111,13 @@ export default function ProjectTabs() {
         ))}
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="mb-2 h-8 w-8" size="icon">
+            <Button variant="outline" className="mb-2 h-8 w-8  shadow-inner" size="icon">
               <Plus className="h-4 w-4" />
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Adicionar Novo Projeto</DialogTitle>
+              <DialogTitle className="text-red-800">Adicionar Novo Projeto</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -132,7 +132,7 @@ export default function ProjectTabs() {
                 />
               </div>
             </div>
-            <Button onClick={addProject}>Adicionar Projeto</Button>
+            <Button className="bg-red-800 hover:bg-red-900" onClick={addProject}>Adicionar Projeto</Button>
           </DialogContent>
         </Dialog>
       </div>

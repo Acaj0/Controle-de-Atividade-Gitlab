@@ -2,8 +2,8 @@ import { NextResponse } from "next/server"
 import axios from "axios"
 import type { CommitData } from "@/types/gitlab"
 
-const BASE_URL = "http://gitlab.ci.redeflex.com.br/api/v4"
-const TOKEN = ""
+const BASE_URL = process.env.url
+const TOKEN = process.env.token
 
 interface GitLabEvent {
   project_id: number

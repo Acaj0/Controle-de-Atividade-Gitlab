@@ -31,7 +31,6 @@ export interface CommitHeatmapProps {
   projectId: number
 }
 
-// Atualizamos a definição de HeatmapValue para usar o tipo genérico corretamente
 export interface HeatmapValue extends ReactCalendarHeatmapValue<Date> {
   date: Date
   count: number

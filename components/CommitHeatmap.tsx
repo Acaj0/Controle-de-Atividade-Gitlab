@@ -32,7 +32,7 @@ export default function CommitGrid({ userId, projectId }: CommitHeatmapProps) {
 
   const commitDates = new Set(commits.map((commit) => commit.date));
 
-  const year = 2025;
+  const year = 2025; //  colocar current year e criar filtro de anos
   const startDate = new Date(year, 0, 1);
   const endDate = new Date(year, 11, 31);
 

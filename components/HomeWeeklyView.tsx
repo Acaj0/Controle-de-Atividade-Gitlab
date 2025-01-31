@@ -1,9 +1,11 @@
 "use client"
 
 import { useQuery } from "react-query"
-import { useState } from "react"
-import type { GitLabProject, GitLabMember } from "../types/gitlab"
+import { useState, useEffect } from "react"
+import type { GitLabProject, GitLabMember, Commit } from "../types/gitlab"
 import CommitDetailsPopup from "./CommitDetailsPopup"
+import { EyeOff, Eye } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 const DAYS_OF_WEEK = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
 
@@ -21,36 +23,36 @@ function getWeekDates() {
   })
 }
 
-interface Commit {
-  date: string
-  branch: string
-  project: string
-}
-
 function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; projects: GitLabProject[] }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const weekDates = getWeekDates()
 
   const queries = projects.map((project) =>
-    useQuery<Commit[], Error>(["commits", member.id, project.id], async () => {
-      const res = await fetch(`/api/commits/${member.id}/${project.id}`)
-      if (!res.ok) throw new Error("Network response was not ok")
-      const data = await res.json()
-      return data.map((commit: any) => ({
-        ...commit,
-        project: project.name,
-      }))
-    }),
+    useQuery<{ commitData: Commit[] }, Error>(
+      ["commits", member.id, project.id],
+      async () => {
+        const res = await fetch(`/api/commits/${member.id}/${project.id}`)
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || "Failed to fetch commit data")
+        }
+        return res.json()
+      },
+      {
+        enabled: !!member.id && !!project.id,
+        retry: (failureCount, error) => {
+          if (error.message === "Project not found") return false
+          return failureCount < 3
+        },
+      },
+    ),
   )
 
   const isLoading = queries.some((query) => query.isLoading)
   const error = queries.some((query) => query.isError)
 
-  if (isLoading) return <div>Carregando...</div>
-  if (error) return <div>Erro ao carregar commits</div>
-
   const allCommits = queries
-    .flatMap((query) => query.data || [])
+    .flatMap((query) => query.data?.commitData || [])
     .filter((commit): commit is Commit => commit !== undefined)
 
   const commitDates = new Set(allCommits.map((commit) => commit.date))
@@ -62,6 +64,9 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
   }
 
   const selectedCommits = selectedDate ? allCommits.filter((commit) => commit.date === selectedDate) : []
+
+  if (isLoading) return <div>Carregando...</div>
+  if (error) return <div>Erro ao carregar commits</div>
 
   return (
     <div className="flex items-center justify-center hover:shadow-lg gap-4 outline-1 outline p-6 rounded-lg">
@@ -92,53 +97,96 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
   const allMembers = projects.flatMap((project) => project.members)
   const uniqueMembers = Array.from(new Map(allMembers.map((member) => [member.id, member])).values())
 
-  const excludedMembers = [
-    "Adrian Toledo Procopiou",
-    "Andressa Da Silva Carvalho",
-    "Fernando Prudencio De Souza",
-    "Jaudo Cesar Martins Correa",
-    "Luis Felipe Amorim Sant Ana",
-    "Joao Almeida",
-    "Ulisses Ribeiro Da Silva",
-  ]
+  const [hiddenUsers, setHiddenUsers] = useState<string[]>([])
 
-  const filteredMembers = uniqueMembers.filter((member) => !excludedMembers.includes(member.name))
+  useEffect(() => {
+    const savedHiddenUsers = localStorage.getItem("hiddenUsers")
+    if (savedHiddenUsers) {
+      setHiddenUsers(JSON.parse(savedHiddenUsers))
+    }
+  }, [])
+
+  const toggleUserVisibility = (userName: string) => {
+    setHiddenUsers((prevHiddenUsers) => {
+      const updatedHiddenUsers = prevHiddenUsers.includes(userName)
+        ? prevHiddenUsers.filter((name) => name !== userName)
+        : [...prevHiddenUsers, userName]
+      localStorage.setItem("hiddenUsers", JSON.stringify(updatedHiddenUsers))
+      return updatedHiddenUsers
+    })
+  }
+
+  const showAllUsers = () => {
+    setHiddenUsers([])
+    localStorage.removeItem("hiddenUsers")
+  }
+
+  const filteredMembers = uniqueMembers.filter((member) => !hiddenUsers.includes(member.name))
   const sortedMembers = filteredMembers.sort((a, b) => a.name.localeCompare(b.name))
-
-  const memberQueries = sortedMembers.map((member) =>
-    projects.map((project) =>
-      useQuery<Commit[], Error>(["commits", member.id, project.id], async () => {
-        const res = await fetch(`/api/commits/${member.id}/${project.id}`)
-        if (!res.ok) throw new Error("Network response was not ok")
-        return res.json()
-      }),
-    ),
-  )
-
-  const isLoading = memberQueries.flat().some((query) => query.isLoading)
-  const error = memberQueries.flat().some((query) => query.isError)
-
-  if (isLoading) return <div>Carregando...</div>
-  if (error) return <div>Erro ao carregar commits</div>
-
-  const today = new Date()
-  const formattedDate = today.toLocaleDateString("pt-BR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+  const hiddenMembers = uniqueMembers.filter((member) => hiddenUsers.includes(member.name))
 
   return (
     <div className="bg-white p-6 rounded-lg">
       <h1 className="text-2xl font-bold mb-6">
-        Visão Semanal de Commits <span className="text-sm text-gray-600">({formattedDate})</span>
+        Visão Semanal de Commits{" "}
+        <span className="text-sm text-gray-600">({new Date().toLocaleDateString("pt-BR")})</span>
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sortedMembers.map((member, index) => (
-          <MemberWeeklyCommits key={member.id} member={member} projects={projects} />
+        {sortedMembers.map((member) => (
+          <div key={member.id} className="relative">
+            <MemberWeeklyCommits member={member} projects={projects} />
+            <button
+              className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity"
+              onClick={() => {
+                if (window.confirm(`Tem certeza que deseja esconder ${member.name}?`)) {
+                  toggleUserVisibility(member.name)
+                }
+              }}
+              title="Esconder usuário"
+            >
+              <EyeOff size={20} />
+            </button>
+          </div>
         ))}
       </div>
+      {hiddenMembers.length > 0 && (
+        <div className="mt-8">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="hidden-users">
+              <AccordionTrigger className="text-xl font-bold">
+                Usuários Escondidos ({hiddenMembers.length})
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-2">
+                  {hiddenMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100"
+                    >
+                      <span>{member.name}</span>
+                      <button
+                        className="text-red-800 hover:text-red-900"
+                        onClick={() => toggleUserVisibility(member.name)}
+                        title="Mostrar usuário"
+                      >
+                        <Eye size={20} />
+                      </button>
+                    </div>
+                  ))}
+                  {hiddenMembers.length > 1 && (
+                    <button
+                      className="mt-4 w-full px-4 py-2 bg-red-800 text-white rounded hover:bg-red-900"
+                      onClick={showAllUsers}
+                    >
+                      Mostrar todos os usuários
+                    </button>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      )}
     </div>
   )
 }

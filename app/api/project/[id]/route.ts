@@ -14,11 +14,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const [projectResponse, membersResponse] = await Promise.all([
       axios.get<GitLabProject>(`${BASE_URL}/projects/${projectId}`, {
         headers: { Authorization: `Bearer ${TOKEN}` },
-        timeout: 10000, 
+        timeout: 10000,
       }),
       axios.get<GitLabMember[]>(`${BASE_URL}/projects/${projectId}/members`, {
         headers: { Authorization: `Bearer ${TOKEN}` },
-        timeout: 10000, 
+        timeout: 10000,
       }),
     ])
 

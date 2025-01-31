@@ -9,12 +9,20 @@ export interface GitLabMember {
   web_url: string
 }
 
+export interface Commit {
+  date: string
+  branch: string
+  project: string
+  message: string
+}
+
 export interface GitLabProject {
   id: number
   name: string
   description: string | null
   web_url: string
   members: GitLabMember[]
+  commitData?: Commit[]
 }
 
 export interface CommitData {

@@ -1,15 +1,6 @@
 import type React from "react"
 import { X } from "lucide-react"
-
-interface Commit {
-  date: string
-  branch: string
-  project: string
-}
-
-interface GitLabMember {
-  name: string
-}
+import type { Commit, GitLabMember } from "../types/gitlab"
 
 interface CommitDetailsPopupProps {
   commits: Commit[]
@@ -40,6 +31,10 @@ const CommitDetailsPopup: React.FC<CommitDetailsPopupProps> = ({ commits, date, 
               <div>
                 <div className="font-medium">Branch:</div>
                 <div>{commit.branch}</div>
+              </div>
+              <div>
+                <div className="font-medium">Mensagem:</div>
+                <div>{commit.message}</div>
               </div>
               {index < commits.length - 1 && <hr className="my-4" />}
             </div>

@@ -1,6 +1,7 @@
 import type React from "react"
 import { X } from "lucide-react"
 import type { Commit, GitLabMember } from "../types/gitlab"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion"
 
 interface CommitDetailsPopupProps {
   commits: Commit[]
@@ -33,8 +34,16 @@ const CommitDetailsPopup: React.FC<CommitDetailsPopupProps> = ({ commits, date, 
                 <div>{commit.branch}</div>
               </div>
               <div>
-                <div className="font-medium">Mensagem:</div>
-                <div>{commit.message}</div>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="message">
+                    <AccordionTrigger className="text-md">
+                      <div className="font-medium">Mensagem do Commit</div>
+                    </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex overflow-visible text-wrap">{commit.message}</div>
+                      </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
               {index < commits.length - 1 && <hr className="my-4" />}
             </div>

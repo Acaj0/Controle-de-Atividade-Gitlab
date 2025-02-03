@@ -9,7 +9,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
   const { userId, projectId } = params
 
   try {
-    const eventsResponse = await axios.get(`${BASE_URL}/projects/${projectId}/events?action=pushed&per_page=100`, {
+    const eventsResponse = await axios.get(`${BASE_URL}/projects/${projectId}/events?action=pushed&per_page=1000`, {
       headers: { Authorization: `Bearer ${TOKEN}` },
       timeout: 10000,
     })

@@ -154,7 +154,7 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="hidden-users">
               <AccordionTrigger className="text-xl font-bold">
-                Usuários Escondidos ({hiddenMembers.length})
+                Usuários Ocultos ({hiddenMembers.length})
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-2">

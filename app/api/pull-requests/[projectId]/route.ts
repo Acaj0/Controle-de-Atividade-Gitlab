@@ -26,7 +26,6 @@ export async function GET(request: Request, { params }: { params: { userId: stri
     const prData = await Promise.all(
       mergeRequestsResponse.data.map(async (mr: any) => {
         try {
-          // Fetch notes (comments) for each merge request
           const notesResponse = await axios.get(`${BASE_URL}/projects/${projectId}/merge_requests/${mr.iid}/notes`, {
             params: {
               per_page: 100,

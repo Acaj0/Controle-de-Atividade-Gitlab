@@ -9,7 +9,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
   const { userId, projectId } = params
 
   try {
-    const eventsResponse = await axios.get(`${BASE_URL}/projects/${projectId}/events?action=pushed&per_page=1000`, {
+    const eventsResponse = await axios.get(`${BASE_URL}/projects/${projectId}/events?action=pushed&per_page=100`, {
       headers: { Authorization: `Bearer ${TOKEN}` },
       timeout: 10000,
     })
@@ -21,6 +21,8 @@ export async function GET(request: Request, { params }: { params: { userId: stri
         branch: event.push_data?.ref?.replace("refs/heads/", "") || "unknown",
         message: event.push_data?.commit_title || "No message",
         project: projectId,
+        sha: event.push_data?.commit_to || "unknown", 
+
       }))
 
     return NextResponse.json({ commitData })

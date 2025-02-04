@@ -1,4 +1,3 @@
-import type { ReactCalendarHeatmapValue } from "react-calendar-heatmap"
 
 export interface GitLabMember {
   id: number
@@ -11,9 +10,11 @@ export interface GitLabMember {
 
 export interface Commit {
   date: string
+  sha: string
   branch: string
   project: string
   message: string
+  author_name: string
 }
 
 export interface GitLabProject {
@@ -39,8 +40,4 @@ export interface CommitHeatmapProps {
   projectId: number
 }
 
-export interface HeatmapValue extends ReactCalendarHeatmapValue<Date> {
-  date: Date
-  count: number
-}
 

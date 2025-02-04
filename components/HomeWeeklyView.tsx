@@ -87,6 +87,7 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
           date={selectedDate}
           onClose={() => setSelectedDate(null)}
           member={member}
+          projects={projects}
         />
       )}
     </div>
@@ -129,7 +130,14 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
     <div className="bg-white p-6 rounded-lg">
       <h1 className="text-2xl font-bold mb-6">
         Visão Semanal de Commits{" "}
-        <span className="text-sm text-gray-600">({new Date().toLocaleDateString("pt-BR")})</span>
+        <span className="text-sm text-gray-600">
+          {new Date().toLocaleDateString("pt-BR", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </span>
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {sortedMembers.map((member) => (
@@ -154,7 +162,7 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="hidden-users">
               <AccordionTrigger className="text-xl font-bold">
-                Usuários Ocultos ({hiddenMembers.length})
+                Usuários Ocultados ({hiddenMembers.length})
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-2">

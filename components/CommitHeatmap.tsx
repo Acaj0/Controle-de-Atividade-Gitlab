@@ -63,7 +63,7 @@ export default function CommitGrid({ userId, projectId }: CommitGridProps) {
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
   return (
-    <div className="space-y-4 overflow-x-scroll lg:overflow-clip">
+    <div className="space-y-4 overflow-x-scroll scrollbar lg:overflow-clip">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Commits de {selectedYear}</h2>
         <select

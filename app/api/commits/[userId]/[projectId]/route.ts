@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       .map((event: any) => ({
         date: event.created_at.split("T")[0],
         branch: event.push_data?.ref?.replace("refs/heads/", "") || "unknown",
-        message: event.push_data?.commit_title || "No message",
+        message: event.push_data?.commit_title || "Nenhuma mensagem",
         project: projectId,
         sha: event.push_data?.commit_to || "unknown", 
 

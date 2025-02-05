@@ -59,13 +59,13 @@ export default function CommitGrid({ userId, projectId }: CommitGridProps) {
   }
 
   const firstDayOfWeek = startDate.getDay()
-  const adjustedFirstDayOfWeek = firstDayOfWeek // Correção do cálculo
+  const adjustedFirstDayOfWeek = firstDayOfWeek
   const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
   return (
-    <div className="space-y-4 overflow-x-scroll scrollbar lg:overflow-clip">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Commits de {selectedYear}</h2>
+    <div className="space-y-4 overflow-x-scroll  scrollbar">
+      <div className="flex justify-start gap-2 items-center">
+        <h2 className="text-xl font-bold">Commits de </h2>
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -82,33 +82,29 @@ export default function CommitGrid({ userId, projectId }: CommitGridProps) {
         </select>
       </div>
       <div className="space-y-1">
-        <div className="flex ml-24 gap-14 mb-1">
+        <div className="flex ml-11 gap-11 mb-1">
           {months.map((month, index) => (
-            <div key={index} className="w-[16px] ml-1 mr-2 text-xs text-gray-400">
+            <div key={index} className="w-[5px] ml-1 mr-2 text-xs text-gray-400">
               {month}
             </div>
           ))}
         </div>
         <div className="flex">
-          <div className="grid mt-2 grid-rows-7 gap-[3px] mr-2 text-xs text-gray-400">
-            <div className="h-4 flex items-center">Dom</div>
-            <div className="h-4 flex items-center">Seg</div>
-            <div className="h-4 flex items-center">Ter</div>
-            <div className="h-4 flex items-center">Qua</div>
-            <div className="h-4 flex items-center">Qui</div>
-            <div className="h-4 flex items-center">Sex</div>
-            <div className="h-4 flex items-center">Sáb</div>
+          <div className="grid mt-4 grid-rows-3 gap-[6px] mr-2 text-xs text-gray-400">
+            <div className="h-2 flex items-center">Seg</div>
+            <div className="h-2 flex items-center">Qua</div>
+            <div className="h-2 flex items-center">Sex</div>
           </div>
-          <div className="flex gap-1 mt-2">
+          <div className="flex gap-[2px] mt-1 h-24">
             {Array.from({ length: Math.ceil((daysOfYear.length + adjustedFirstDayOfWeek) / 7) }, (_, weekIndex) => (
-              <div key={weekIndex} className="grid grid-rows-7 gap-1">
+              <div key={weekIndex} className="grid grid-rows-7 gap-">
                 {Array.from({ length: 7 }, (_, dayIndex) => {
                   const dayOfYearIndex = weekIndex * 7 + dayIndex - adjustedFirstDayOfWeek
                   const day = daysOfYear[dayOfYearIndex]
                   return (
                     <div
                       key={dayIndex}
-                      className={`w-4 h-4 rounded-sm ${
+                      className={`w-3 h-3 rounded-sm ${
                         day ? (day.hasCommit ? "bg-red-800" : "bg-gray-200") : "bg-transparent"
                       }`}
                       title={day ? (day.hasCommit ? `✔ Commit em ${day.date}` : `❌ Sem commit em ${day.date}`) : ""}

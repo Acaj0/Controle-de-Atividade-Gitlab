@@ -2,6 +2,9 @@ import type { ProjectCardProps } from "../types/gitlab";
 import CommitGrid from "./CommitHeatmap";
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+
+  const sortedMembers = project.members.sort((a, b) => a.name.localeCompare(b.name))
+  
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
       <h2 className="text-2xl font-bold ">{project.name}</h2>

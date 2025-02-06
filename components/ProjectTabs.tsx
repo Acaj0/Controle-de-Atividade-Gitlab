@@ -74,7 +74,7 @@ export default function ProjectTabs() {
     <div>
       <div className="mb-2 flex flex-wrap items-center">
         <button
-          className={`px-4 py-2 hover:shadow-lg rounded-sm mr-2 mb-2 ${
+          className={`px-4 py-2 hover:shadow-lg transition-shadow duration-150 rounded-sm mr-2 mb-2 ${
             activeTab === "home" ? "bg-red-800 text-white" : "bg-white"
           }`}
           onClick={() => setActiveTab("home")}
@@ -92,7 +92,7 @@ export default function ProjectTabs() {
         {projects.map((project) => (
           <button
             key={project.id}
-            className={`px-4 py-2 hover:shadow-lg rounded-sm mr-2 mb-2 relative group ${
+            className={`px-4 py-2 hover:shadow-lg transition-shadow duration-150 rounded-sm mr-2 mb-2 relative group ${
               activeTab === project.id ? "bg-red-800 text-white" : "bg-white"
             }`}
             onClick={() => setActiveTab(project.id)}

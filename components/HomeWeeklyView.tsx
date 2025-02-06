@@ -69,13 +69,13 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
   if (error) return <div>Erro ao carregar commits</div>
 
   return (
-    <div className="flex items-center justify-center hover:shadow-lg gap-4 outline-1 outline p-6 rounded-lg">
+    <div className="flex items-center justify-center hover:shadow-lg duration-150 transition-shadow gap-4 outline-1 outline p-6 rounded-lg">
       <span className="text-xl font-medium text-center w-96 text-clip">{member.name}</span>
       <div className="flex gap-2">
         {weekDates.map((date) => (
           <div
             key={date}
-            className={`w-6 h-6 rounded-sm ${commitDates.has(date) ? "bg-red-800 cursor-pointer" : "bg-gray-200"}`}
+            className={`w-6 h-6 rounded-sm ${commitDates.has(date) ? "bg-red-800 hover:bg-red-900 cursor-pointer" : "bg-gray-200"}`}
             title={`${date}: ${commitDates.has(date) ? "✔ Commit" : "❌ Sem commit"}`}
             onClick={() => handleCommitClick(date)}
           />
@@ -146,11 +146,11 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
             <button
               className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity"
               onClick={() => {
-                if (window.confirm(`Tem certeza que deseja esconder ${member.name}?`)) {
+                if (window.confirm(`Tem certeza que deseja ocultar ${member.name}?`)) {
                   toggleUserVisibility(member.name)
                 }
               }}
-              title="Esconder usuário"
+              title="Ocultar usuário"
             >
               <EyeOff size={20} />
             </button>

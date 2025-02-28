@@ -49,8 +49,9 @@ export async function GET(request: Request, { params }: { params: { userId: stri
             state: mr.state,
             created_at: mr.created_at,
             updated_at: mr.updated_at,
-            activity: userActivity,
+            activity: userActivity, 
           }
+
         } catch (error) {
           console.error(`Error fetching notes for MR ${mr.iid}:`, error)
           return null

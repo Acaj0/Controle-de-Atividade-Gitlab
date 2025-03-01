@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery } from "react-query"
 import ProjectCard from "./ProjectCard"
 import HomeWeeklyView from "./HomeWeeklyView"
@@ -12,12 +12,28 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { GitLabProject } from "../types/gitlab"
 
-const defaultProjectIds = [221, 217, 224, 170, 181, 183, 201, 177, 26, 215, 33, 230]
+const defaultProjectIds = [221, 217, 224, 170, 181, 183, 201, 177, 26, 215, 33, 230, 234]
 
 export default function ProjectTabs() {
   const [activeTab, setActiveTab] = useState<number | "home">("home")
-  const [projectIds, setProjectIds] = useState<number[]>(defaultProjectIds)
+  const [projectIds, setProjectIds] = useState<number[]>(() => {
+    if (typeof window !== "undefined") {
+      const savedProjects = localStorage.getItem("projectIds")
+      if (!savedProjects) {
+        localStorage.setItem("projectIds", JSON.stringify(defaultProjectIds))
+        return defaultProjectIds
+      }
+      return JSON.parse(savedProjects)
+    }
+    return defaultProjectIds
+  })
   const [newProjectId, setNewProjectId] = useState<string>("")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("projectIds", JSON.stringify(projectIds))
+    }
+  }, [projectIds])
 
   const {
     data: projects,
@@ -57,6 +73,10 @@ export default function ProjectTabs() {
       setNewProjectId("")
       refetch()
     }
+  }
+
+  const resetToDefaultProjects = () => {
+    setProjectIds(defaultProjectIds)
   }
 
   if (isLoading) return <div>Carregando...</div>
@@ -132,7 +152,14 @@ export default function ProjectTabs() {
                 />
               </div>
             </div>
-            <Button className="bg-red-800 hover:bg-red-900" onClick={addProject}>Adicionar Projeto</Button>
+            <div className="flex justify-between">
+              <Button className="bg-red-800 hover:bg-red-900" onClick={addProject}>
+                Adicionar Projeto
+              </Button>
+              <Button variant="outline" onClick={resetToDefaultProjects}>
+                Resetar para Padrão
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

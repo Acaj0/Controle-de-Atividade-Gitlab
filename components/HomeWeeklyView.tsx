@@ -31,7 +31,7 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
     useQuery<{ commitData: Commit[] }, Error>(
       ["commits", member.id, project.id],
       async () => {
-        const res = await fetch(`/api/commits/${member.id}/${project.id}`)
+        const res = await fetch(`/api/commits-week/${member.id}/${project.id}`)
         if (!res.ok) {
           const errorData = await res.json()
           throw new Error(errorData.error || "Failed to fetch commit data")

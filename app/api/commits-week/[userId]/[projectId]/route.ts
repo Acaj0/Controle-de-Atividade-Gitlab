@@ -1,31 +1,42 @@
-import { NextResponse } from "next/server";
-import axios from "axios";
-import type { Commit } from "@/types/gitlab";
+import { NextResponse } from "next/server"
+import axios from "axios"
+import type { Commit } from "@/types/gitlab"
 
-const BASE_URL = process.env.url;
-const TOKEN = process.env.token;
+const BASE_URL = process.env.url
+const TOKEN = process.env.token
 
 function getWeekRange() {
-  const today = new Date();
-  const currentDay = today.getDay();
-  const diff = currentDay === 0 ? 6 : currentDay - 1;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - diff);
-
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  const today = new Date()
+  const currentDay = today.getDay()
+  const diff = currentDay === 0 ? 6 : currentDay - 1
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - diff)
 
   return {
-    start: monday.toISOString().split("T")[0],    
-  };
+    start: monday.toISOString().split("T")[0],
+  }
 }
 
+const cache = new Map<string, { data: any; timestamp: number }>()
+const CACHE_TTL = 5 * 60 * 1000 
+
 export async function GET(request: Request, { params }: { params: { userId: string; projectId: string } }) {
-  const { userId, projectId } = params;
-  const { start } = getWeekRange();
-  let allEvents: any[] = [];
-  let page: number = 1;
-  let hasMore: boolean = true;
+  const { userId, projectId } = params
+  const { start } = getWeekRange()
+
+  const cacheKey = `user-${userId}-project-${projectId}-week-${start}`
+
+  const cachedData = cache.get(cacheKey)
+  if (cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
+    console.log(`Usando cache para usuário ${userId} no projeto ${projectId}`)
+    return NextResponse.json({ commitData: cachedData.data })
+  }
+
+  console.log(`Buscando commits para usuário ${userId} no projeto ${projectId}`)
+
+  let allEvents: any[] = []
+  let page = 1
+  let hasMore = true
 
   try {
     while (hasMore) {
@@ -34,44 +45,65 @@ export async function GET(request: Request, { params }: { params: { userId: stri
           action: "pushed",
           per_page: 100,
           page: page,
-          since: start,    
-          },
+          since: start,
+        },
         headers: { Authorization: `Bearer ${TOKEN}` },
         timeout: 10000,
-      });
+      })
 
       if (Array.isArray(eventsResponse.data) && eventsResponse.data.length > 0) {
-        allEvents = [...allEvents, ...eventsResponse.data];
-        page++;
+        allEvents = [...allEvents, ...eventsResponse.data]
+        page++
       } else {
-        hasMore = false;
+        hasMore = false
       }
     }
 
-    const commitData: Commit[] = allEvents
-      .filter((event: any) => event.author_id === Number(userId)) 
-      .map((event: any) => ({
-        date: event.created_at?.split("T")[0] || "unknown",
-        branch: event.push_data?.ref?.replace("refs/heads/", "") || "unknown",
-        message: event.push_data?.commit_title || "Nenhuma mensagem",
-        project: projectId,
-        sha: event.push_data?.commit_to || "unknown",
-        author_name: event.author?.name || "Desconhecido",
-      }));
+    
+    const userIdNumber = Number(userId)
 
-    return NextResponse.json({ commitData });
+    console.log(`Total de eventos encontrados: ${allEvents.length}`)
+    console.log(`Filtrando eventos para o usuário ID: ${userIdNumber}`)
+
+    const userEvents = allEvents.filter((event: any) => {
+      const eventAuthorId = Number(event.author_id)
+      const isMatch = eventAuthorId === userIdNumber
+
+      if (isMatch) {
+        console.log(`Evento encontrado para usuário ${userIdNumber}: ${event.push_data?.commit_title || "Sem título"}`)
+      }
+
+      return isMatch
+    })
+
+    console.log(`Eventos filtrados para o usuário ${userIdNumber}: ${userEvents.length}`)
+
+    const commitData: Commit[] = userEvents.map((event: any) => ({
+      date: event.created_at?.split("T")[0] || "unknown",
+      branch: event.push_data?.ref?.replace("refs/heads/", "") || "unknown",
+      message: event.push_data?.commit_title || "Nenhuma mensagem",
+      project: projectId,
+      sha: event.push_data?.commit_to || "unknown",
+      author_name: event.author?.name || "Desconhecido",
+    }))
+
+    cache.set(cacheKey, { data: commitData, timestamp: Date.now() })
+    console.log(`Armazenado em cache: ${commitData.length} commits para usuário ${userId}`)
+
+    return NextResponse.json({ commitData })
   } catch (error) {
-    console.error("Error fetching commit data:", error);
+    console.error(`Erro ao buscar commits para usuário ${userId}:`, error)
     if (axios.isAxiosError(error)) {
       if (error.response) {
         return NextResponse.json(
           { error: `GitLab API error: ${error.response.status}` },
-          { status: error.response.status }
-        );
+          { status: error.response.status },
+        )
       } else if (error.request) {
-        return NextResponse.json({ error: "No response received from GitLab API" }, { status: 503 });
+        return NextResponse.json({ error: "No response received from GitLab API" }, { status: 503 })
       }
     }
-    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
+    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 })
   }
 }
+

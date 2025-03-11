@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { GitLabProject } from "../types/gitlab"
 
-const defaultProjectIds = [66510560, 66510759, 66510764]//[221, 217, 224, 170, 181, 183, 201, 177, 26, 215, 33, 230, 234]
+const defaultProjectIds = [221, 217, 224, 170, 181, 183, 201, 177, 26, 215, 33, 230, 234]
 
 export default function ProjectTabs() {
   const [activeTab, setActiveTab] = useState<number | "home">("home")

@@ -9,6 +9,29 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const DAYS_OF_WEEK = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
 
+const fetchCommits = async (memberId: number, projectId: number): Promise<{ commitData: Commit[] }> => {
+  const hiddenUsersStr = localStorage.getItem("hiddenUsers")
+  if (hiddenUsersStr) {
+    try {
+      const hiddenUsers = JSON.parse(hiddenUsersStr) as Array<{ id: number; name: string }>
+      const isHidden = hiddenUsers.some((user) => user.id === memberId)
+
+      if (isHidden) {
+        return { commitData: [] }
+      }
+    } catch (error) {
+      console.error("Error parsing hidden users:", error)
+    }
+  }
+
+  const res = await fetch(`/api/commits-week/${memberId}/${projectId}`)
+  if (!res.ok) {
+    const errorData = await res.json()
+    throw new Error(errorData.error || "Failed to fetch commit data")
+  }
+  return res.json()
+}
+
 function getWeekDates() {
   const today = new Date()
   const currentDay = today.getDay()
@@ -30,14 +53,7 @@ function MemberWeeklyCommits({ member, projects }: { member: GitLabMember; proje
   const queries = projects.map((project) =>
     useQuery<{ commitData: Commit[] }, Error>(
       ["commits", member.id, project.id],
-      async () => {
-        const res = await fetch(`/api/commits-week/${member.id}/${project.id}`)
-        if (!res.ok) {
-          const errorData = await res.json()
-          throw new Error(errorData.error || "Failed to fetch commit data")
-        }
-        return res.json()
-      },
+      () => fetchCommits(member.id, project.id),
       {
         enabled: !!member.id && !!project.id,
         retry: (failureCount, error) => {
@@ -98,20 +114,23 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
   const allMembers = projects.flatMap((project) => project.members)
   const uniqueMembers = Array.from(new Map(allMembers.map((member) => [member.id, member])).values())
 
-  const [hiddenUsers, setHiddenUsers] = useState<string[]>([])
+  const [hiddenUsers, setHiddenUsers] = useState<{ id: number; name: string }[]>([])
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
     const savedHiddenUsers = localStorage.getItem("hiddenUsers")
     if (savedHiddenUsers) {
       setHiddenUsers(JSON.parse(savedHiddenUsers))
     }
+    setIsInitialized(true)
   }, [])
 
-  const toggleUserVisibility = (userName: string) => {
+  const toggleUserVisibility = (member: GitLabMember) => {
     setHiddenUsers((prevHiddenUsers) => {
-      const updatedHiddenUsers = prevHiddenUsers.includes(userName)
-        ? prevHiddenUsers.filter((name) => name !== userName)
-        : [...prevHiddenUsers, userName]
+      const updatedHiddenUsers = prevHiddenUsers.some((user) => user.id === member.id)
+        ? prevHiddenUsers.filter((user) => user.id !== member.id)
+        : [...prevHiddenUsers, { id: member.id, name: member.name }]
+
       localStorage.setItem("hiddenUsers", JSON.stringify(updatedHiddenUsers))
       return updatedHiddenUsers
     })
@@ -122,9 +141,15 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
     localStorage.removeItem("hiddenUsers")
   }
 
-  const filteredMembers = uniqueMembers.filter((member) => !hiddenUsers.includes(member.name))
+  const hiddenUserIds = hiddenUsers.map((user) => user.id)
+  const filteredMembers = uniqueMembers.filter((member) => !hiddenUserIds.includes(member.id))
   const sortedMembers = filteredMembers.sort((a, b) => a.name.localeCompare(b.name))
-  const hiddenMembers = uniqueMembers.filter((member) => hiddenUsers.includes(member.name))
+  const hiddenMembers = uniqueMembers.filter((member) => hiddenUserIds.includes(member.id))
+  const sortedHiddenMembers = hiddenMembers.sort((a, b) => a.name.localeCompare(b.name))
+
+  if (!isInitialized) {
+    return <div>Carregando configurações...</div>
+  }
 
   return (
     <div className="bg-white p-6 rounded-lg">
@@ -147,7 +172,7 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
               className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity"
               onClick={() => {
                 if (window.confirm(`Tem certeza que deseja ocultar ${member.name}?`)) {
-                  toggleUserVisibility(member.name)
+                  toggleUserVisibility(member)
                 }
               }}
               title="Ocultar usuário"
@@ -166,29 +191,27 @@ export default function HomeWeeklyView({ projects }: { projects: GitLabProject[]
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-2">
-                  {hiddenMembers.map((member) => (
+                  {sortedHiddenMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100"
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-200"
                     >
                       <span>{member.name}</span>
                       <button
                         className="text-red-800 hover:text-red-900"
-                        onClick={() => toggleUserVisibility(member.name)}
+                        onClick={() => toggleUserVisibility(member)}
                         title="Mostrar usuário"
                       >
                         <Eye size={20} />
                       </button>
                     </div>
                   ))}
-                  {hiddenMembers.length > 1 && (
-                    <button
-                      className="mt-4 w-full px-4 py-2 bg-red-800 text-white rounded hover:bg-red-900"
-                      onClick={showAllUsers}
-                    >
-                      Mostrar todos os usuários
-                    </button>
-                  )}
+                  <button
+                    className="mt-4 w-full px-4 py-2 bg-red-800 text-white rounded hover:bg-red-900"
+                    onClick={showAllUsers}
+                  >
+                    Mostrar todos os usuários
+                  </button>
                 </div>
               </AccordionContent>
             </AccordionItem>

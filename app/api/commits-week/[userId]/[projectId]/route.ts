@@ -8,21 +8,28 @@ const TOKEN = process.env.token
 function getWeekRange() {
   const today = new Date()
   const currentDay = today.getDay()
-  const diff = currentDay === 0 ? 6 : currentDay - 1
-  const monday = new Date(today)
-  monday.setDate(today.getDate() - diff)
+  const diff = currentDay
+
+  const sunday = new Date(today)
+  sunday.setDate(today.getDate() - diff)
+
+  const saturday = new Date(sunday)
+  saturday.setDate(sunday.getDate() + 6)
 
   return {
-    start: monday.toISOString().split("T")[0],
+    start: sunday.toISOString().split("T")[0],
+    end: saturday.toISOString().split("T")[0],
   }
 }
 
+
+
 const cache = new Map<string, { data: any; timestamp: number }>()
-const CACHE_TTL = 5 * 60 * 1000 
+const CACHE_TTL = 60 * 60 * 1000 
 
 export async function GET(request: Request, { params }: { params: { userId: string; projectId: string } }) {
   const { userId, projectId } = params
-  const { start } = getWeekRange()
+  const { start, end } = getWeekRange()
 
   const cacheKey = `user-${userId}-project-${projectId}-week-${start}`
 
@@ -45,7 +52,8 @@ export async function GET(request: Request, { params }: { params: { userId: stri
           action: "pushed",
           per_page: 100,
           page: page,
-          since: start,
+          after: start,
+          //until: end,
         },
         headers: { Authorization: `Bearer ${TOKEN}` },
         timeout: 10000,
@@ -59,7 +67,6 @@ export async function GET(request: Request, { params }: { params: { userId: stri
       }
     }
 
-    
     const userIdNumber = Number(userId)
 
     console.log(`Total de eventos encontrados: ${allEvents.length}`)
@@ -106,4 +113,3 @@ export async function GET(request: Request, { params }: { params: { userId: stri
     return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 })
   }
 }
-
